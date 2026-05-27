@@ -3,47 +3,48 @@
 @tailwind utilities;
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 20 14.3% 4.1%;
-  --muted: 60 4.8% 95.9%;
-  --muted-foreground: 25 5.3% 44.7%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 20 14.3% 4.1%;
-  --card: 0 0% 100%;
-  --card-foreground: 20 14.3% 4.1%;
-  --border: 20 5.9% 90%;
-  --input: 20 5.9% 90%;
-  --primary: 207 90% 54%; /* #1976D2 */
-  --primary-foreground: 211 100% 99%;
-  --secondary: 60 4.8% 95.9%;
-  --secondary-foreground: 24 9.8% 10%;
-  --accent: 60 4.8% 95.9%;
-  --accent-foreground: 24 9.8% 10%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 60 9.1% 97.8%;
-  --ring: 20 14.3% 4.1%;
+  --background: 20 10% 4%;
+  --foreground: 45 30% 88%;
+  --muted: 25 10% 10%;
+  --muted-foreground: 40 15% 45%;
+  --popover: 25 12% 7%;
+  --popover-foreground: 45 30% 88%;
+  --card: 25 12% 7%;
+  --card-foreground: 45 30% 88%;
+  --border: 43 40% 18%;
+  --input: 25 12% 10%;
+  --primary: 43 85% 48%;
+  --primary-foreground: 20 10% 4%;
+  --secondary: 25 15% 12%;
+  --secondary-foreground: 45 20% 65%;
+  --accent: 43 75% 35%;
+  --accent-foreground: 45 30% 90%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 43 85% 48%;
   --radius: 0.5rem;
-  --success: 122 39% 49%; /* #388E3C */
-  --warning: 36 100% 50%; /* #F57C00 */
-  --error: 0 68% 42%; /* #D32F2F */
-  --surface: 0 0% 100%;
-  --chart-1: 207 90% 54%;
-  --chart-2: 122 39% 49%;
-  --chart-3: 36 100% 50%;
-  --chart-4: 291 64% 42%;
-  --chart-5: 0 68% 42%;
+  --success: 43 85% 48%;
+  --warning: 36 100% 50%;
+  --error: 0 68% 42%;
+  --surface: 25 12% 7%;
+  --chart-1: 43 85% 48%;
+  --chart-2: 43 65% 38%;
+  --chart-3: 43 50% 28%;
+  --chart-4: 35 70% 42%;
+  --chart-5: 50 80% 55%;
 }
 
 /* Custom animations for Bingo game */
 @keyframes shuffle-blink {
-  0%, 100% { 
-    background-color: rgb(251 191 36); 
+  0%,
+  100% {
+    background-color: rgb(212 160 23);
     transform: scale(1) rotate(0deg);
-    box-shadow: 0 0 12px rgba(251, 191, 36, 0.8);
-    border: 2px solid rgba(251, 191, 36, 0.5);
+    box-shadow: 0 0 12px rgba(212, 160, 23, 0.8);
+    border: 2px solid rgba(212, 160, 23, 0.5);
   }
-  20% { 
-    background-color: rgb(239 68 68); 
+  20% {
+    background-color: rgb(239 68 68);
     transform: scale(1.15) rotate(8deg);
     box-shadow: 0 0 18px rgba(239, 68, 68, 0.9);
     border: 2px solid rgba(239, 68, 68, 0.7);
@@ -51,32 +52,34 @@
 }
 
 @keyframes winner-blink {
-  0%, 100% { 
-    background-color: rgb(59 130 246); 
+  0%,
+  100% {
+    background-color: rgb(212 160 23);
     transform: scale(1);
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
-    border: 3px solid rgba(59, 130, 246, 0.9);
+    box-shadow: 0 0 20px rgba(212, 160, 23, 0.9);
+    border: 3px solid rgba(212, 160, 23, 0.9);
   }
-  50% { 
-    background-color: rgb(37 99 235); 
+  50% {
+    background-color: rgb(242 201 76);
     transform: scale(1.1);
-    box-shadow: 0 0 25px rgba(37, 99, 235, 0.9);
-    border: 3px solid rgba(37, 99, 235, 1);
+    box-shadow: 0 0 35px rgba(242, 201, 76, 1);
+    border: 3px solid rgba(242, 201, 76, 1);
   }
 }
 
 .winner-cell-animation {
   animation: winner-blink 1s ease-in-out infinite;
-  color: white !important;
+  color: #080604 !important;
   font-weight: bold;
 }
 
 /* Slow blinking animation for called numbers */
 @keyframes slow-blink {
-  0%, 100% { 
+  0%,
+  100% {
     opacity: 1;
   }
-  50% { 
+  50% {
     opacity: 0.4;
   }
 }
@@ -101,30 +104,35 @@
 }
 
 .dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --primary: 207 90% 54%;
-  --primary-foreground: 211 100% 99%;
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
+  --background: 20 10% 4%;
+  --foreground: 45 30% 88%;
+  --muted: 25 10% 10%;
+  --muted-foreground: 40 15% 45%;
+  --popover: 25 12% 7%;
+  --popover-foreground: 45 30% 88%;
+  --card: 25 12% 7%;
+  --card-foreground: 45 30% 88%;
+  --border: 43 40% 18%;
+  --input: 25 12% 10%;
+  --primary: 43 85% 48%;
+  --primary-foreground: 20 10% 4%;
+  --secondary: 25 15% 12%;
+  --secondary-foreground: 45 20% 65%;
+  --accent: 43 75% 35%;
+  --accent-foreground: 45 30% 90%;
+  --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 98%;
-  --ring: 240 4.9% 83.9%;
+  --ring: 43 85% 48%;
   --radius: 0.5rem;
-  --success: 122 39% 49%;
+  --success: 43 85% 48%;
   --warning: 36 100% 50%;
   --error: 0 68% 42%;
-  --surface: 240 10% 3.9%;
+  --surface: 25 12% 7%;
+  --chart-1: 43 85% 48%;
+  --chart-2: 43 65% 38%;
+  --chart-3: 43 50% 28%;
+  --chart-4: 35 70% 42%;
+  --chart-5: 50 80% 55%;
 }
 
 @layer base {
@@ -134,7 +142,23 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
+  }
+
+  /* Gold scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #080604;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #8c6500;
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #d4a017;
   }
 }
 
@@ -142,20 +166,38 @@
   .bingo-cell {
     @apply aspect-square flex items-center justify-center text-sm font-medium border rounded transition-colors;
   }
-  
+
   .bingo-cell.called {
-    @apply bg-green-100 border-green-400 text-green-800 font-semibold;
+    background-color: rgba(212, 160, 23, 0.2);
+    border-color: rgba(212, 160, 23, 0.7);
+    color: #f2c94c;
+    font-weight: 600;
+    box-shadow: 0 0 8px rgba(212, 160, 23, 0.3);
   }
-  
+
   .bingo-cell.free {
-    @apply bg-yellow-100 border-yellow-400 text-yellow-800 font-bold;
+    background: linear-gradient(135deg, #d4a017, #8c6500);
+    border-color: #f2c94c;
+    color: #080604;
+    font-weight: 700;
+    box-shadow: 0 0 12px rgba(212, 160, 23, 0.5);
   }
-  
+
   .bingo-cell.normal {
-    @apply bg-gray-50 border-gray-200 text-gray-600;
+    background-color: #120e09;
+    border-color: #2a2010;
+    color: #8a7a50;
   }
-  
+
+  .bingo-cell.normal:hover {
+    border-color: rgba(212, 160, 23, 0.4);
+    color: #d4a017;
+  }
+
   .bingo-header {
-    @apply text-center font-bold text-primary py-2 bg-blue-50 rounded;
+    @apply text-center font-bold py-2 rounded;
+    background: linear-gradient(135deg, #d4a017, #8c6500);
+    color: #080604;
+    letter-spacing: 0.05em;
   }
 }
