@@ -1,66 +1,73 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
-import ConnectPgSimple from "connect-pg-simple";
-import { pool } from "./db";
+import MemoryStore from "memorystore";
 import { registerRoutes } from "./routes";
 import { registerMongoDBRoutes } from "./mongodb-routes";
 import { initializeMongoDBData } from "./mongodb-setup";
 import { setupVite, serveStatic, log } from "./vite";
+import path from "path";
 
 const app = express();
+const MemoryStoreSession = MemoryStore(session);
 
 // Add CORS headers for proper browser communication
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
-  res.header('Access-Control-Allow-Headers', 'Origin,X-Requested-With,Content-Type,Accept,Authorization,Cache-Control,Pragma,Set-Cookie,Cookie');
-  res.header('Access-Control-Expose-Headers', 'Set-Cookie');
-  
-  if (req.method === 'OPTIONS') {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,PUT,POST,DELETE,OPTIONS,PATCH"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin,X-Requested-With,Content-Type,Accept,Authorization,Cache-Control,Pragma,Set-Cookie,Cookie"
+  );
+  res.header("Access-Control-Expose-Headers", "Set-Cookie");
+
+  if (req.method === "OPTIONS") {
     return res.sendStatus(200);
   }
   next();
 });
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 
 // Serve static audio files with proper MIME types (before other routes)
-import path from "path";
 const publicPath = path.resolve(process.cwd(), "public");
-app.use(express.static(publicPath, {
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.mp3')) {
-      res.setHeader('Content-Type', 'audio/mpeg');
-    }
-  }
-}));
+app.use(
+  express.static(publicPath, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith(".mp3")) {
+        res.setHeader("Content-Type", "audio/mpeg");
+      }
+    },
+  })
+);
 
-// Configure session store
-const PgSession = ConnectPgSimple(session);
-
-// Configure session middleware
-app.use(session({
-  store: new PgSession({
-    pool: pool,
-    tableName: 'session',
-    createTableIfMissing: true
-  }),
-  secret: 'bingo-session-secret-key-longer-for-security',
-  resave: false,
-  saveUninitialized: false,
-  rolling: true,
-  cookie: { 
-    secure: false, 
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    httpOnly: false,
-    sameSite: 'lax',
-    path: '/',
-    domain: undefined
-  },
-  name: 'connect.sid'
-}));
+// Configure session middleware with memory store
+app.use(
+  session({
+    store: new MemoryStoreSession({
+      checkPeriod: 86400000,
+    }),
+    secret:
+      process.env.SESSION_SECRET ||
+      "bingo-session-secret-key-longer-for-security",
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    cookie: {
+      secure: false,
+      maxAge: 24 * 60 * 60 * 1000,
+      httpOnly: false,
+      sameSite: "lax",
+      path: "/",
+      domain: undefined,
+    },
+    name: "connect.sid",
+  })
+);
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -94,7 +101,7 @@ app.use((req, res, next) => {
 
 (async () => {
   const { server } = await registerRoutes(app);
-  
+
   // Register MongoDB routes alongside PostgreSQL routes
   registerMongoDBRoutes(app);
 
@@ -106,55 +113,30 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
   const port = process.env.PORT || 5000;
-  
-  server.listen(port, "0.0.0.0", async () => {
-    log(`serving on port ${port}`);
-    
-    // Initialize MongoDB data
-    try {
-      await initializeMongoDBData();
-    } catch (error) {
-      console.log("MongoDB initialization failed (optional):", error.message);
-    }
-    
-    // Hardcoded cartela loading disabled - admins manage their own cartelas
-    console.log("Hardcoded cartela auto-loading is disabled. Admins can add cartelas manually.");
-  }).on('error', (err: any) => {
-    if (err.code === 'EADDRINUSE') {
-      log(`Port ${port} is already in use. Trying to find an alternative port...`);
-      // Try alternative ports
-      const tryPort = (portToTry: number) => {
-        server.listen({
-          port: portToTry,
-          host: "0.0.0.0",
-        }, () => {
-          log(`serving on port ${portToTry}`);
-        }).on('error', (portErr: any) => {
-          if (portErr.code === 'EADDRINUSE' && portToTry < 5010) {
-            tryPort(portToTry + 1);
-          } else {
-            log(`Failed to start server: ${portErr.message}`);
-            process.exit(1);
-          }
-        });
-      };
-      tryPort(5001);
-    } else {
+
+  server
+    .listen(port, "0.0.0.0", async () => {
+      log(`serving on port ${port}`);
+
+      try {
+        await initializeMongoDBData();
+      } catch (error) {
+        console.log("MongoDB initialization failed (optional):", error.message);
+      }
+
+      console.log(
+        "Hardcoded cartela auto-loading is disabled. Admins can add cartelas manually."
+      );
+    })
+    .on("error", (err: any) => {
       log(`Failed to start server: ${err.message}`);
       process.exit(1);
-    }
-  });
+    });
 })();
