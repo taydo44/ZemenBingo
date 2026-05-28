@@ -201,3 +201,27 @@
     letter-spacing: 0.05em;
   }
 }
+
+/* Fix input visibility inside light modals */
+[role="dialog"] input,
+[role="dialog"] textarea,
+[role="dialog"] select,
+.dialog-content input,
+.dialog-content textarea,
+.dialog-content select {
+  background-color: white !important;
+  color: #1a1a1a !important;
+  border-color: #e2e8f0 !important;
+}
+
+[role="dialog"] label,
+.dialog-content label {
+  color: #1a1a1a !important;
+}
+
+[role="dialog"] h2,
+[role="dialog"] h3,
+.dialog-content h2,
+.dialog-content h3 {
+  color: #1a1a1a !important;
+}
