@@ -165,41 +165,36 @@ export function registerMongoDBRoutes(app: Express): void {
 
         const { username, password, name, email, shopName } = req.body;
 
-        // Check if username already exists
         const existingUser = await User.findOne({ username });
         if (existingUser) {
           return res.status(400).json({ message: "Username already exists" });
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Generate account number
         const accountNumber = `BGO${Math.floor(Math.random() * 1000000000)}`;
 
-        // Create shop first
-        const shop = new Shop({
-          name: shopName,
-          adminId: null, // Will be updated after user creation
-        });
-        await shop.save();
-
-        // Create admin user
+        // Create user first with a temp shopId
         const admin = new User({
           username,
           password: hashedPassword,
           role: "admin",
           name,
           email,
-          shopId: shop._id,
           accountNumber,
           commissionRate: 25,
         });
         await admin.save();
 
-        // Update shop with admin ID
-        shop.adminId = admin._id as any;
+        // Now create shop with the real adminId
+        const shop = new Shop({
+          name: shopName,
+          adminId: admin._id,
+        });
         await shop.save();
+
+        // Link shop back to admin
+        admin.shopId = shop._id as any;
+        await admin.save();
 
         const adminResponse = {
           id: admin._id,
@@ -220,7 +215,6 @@ export function registerMongoDBRoutes(app: Express): void {
       }
     }
   );
-
   // Shop and game routes
   app.get("/api/mongodb/shops", async (req: Request, res: Response) => {
     try {
