@@ -37,7 +37,7 @@ export function AdminCreationForm({ onSuccess }: AdminCreationFormProps) {
 
   // Get existing admins for referral selection
   const { data: existingAdmins = [] } = useQuery({
-    queryKey: ["/api/admin/all-admins"],
+    queryKey: ["/api/mongodb/super-admin/admins"],
   });
 
   const form = useForm<AdminCreationForm>({
@@ -60,7 +60,7 @@ export function AdminCreationForm({ onSuccess }: AdminCreationFormProps) {
         ...data,
         referredBy: data.referredBy && data.referredBy !== "none" && data.referredBy !== "" ? parseInt(data.referredBy) : undefined,
       };
-      const response = await apiRequest("POST", "/api/admin/create-admin", payload);
+      const response = await apiRequest("POST", "/api/mongodb/super-admin/admins", payload);
       return await response.json();
     },
     onSuccess: (data) => {
@@ -69,7 +69,7 @@ export function AdminCreationForm({ onSuccess }: AdminCreationFormProps) {
         description: `Admin ${data.admin.name} created with account number ${data.accountNumber}`,
       });
       form.reset();
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/all-admins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/super-admin/admins"] });
       queryClient.invalidateQueries({ queryKey: ["/api/shops"] });
       onSuccess?.();
     },
