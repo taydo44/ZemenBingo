@@ -225,3 +225,21 @@
 .dialog-content h3 {
   color: #1a1a1a !important;
 }
+
+/* Fix modal/dialog input visibility */
+dialog input, dialog textarea, dialog select,
+[role="dialog"] input, [role="dialog"] textarea, [role="dialog"] select,
+.fixed input, .fixed textarea, .fixed select {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+dialog label, [role="dialog"] label, .fixed label {
+  color: #111111 !important;
+}
+
+dialog h2, dialog h3, dialog p,
+[role="dialog"] h2, [role="dialog"] h3, [role="dialog"] p {
+  color: #111111 !important;
+}
