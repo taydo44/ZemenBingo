@@ -27,7 +27,7 @@ export function AuthProvider(props: { children: ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   const { data: userData = null, isLoading, refetch } = useQuery({
-    queryKey: ["/api/auth/me"],
+    queryKey: ["/api/mongodb/auth/me"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: 1,
     refetchOnWindowFocus: true,
@@ -38,15 +38,15 @@ export function AuthProvider(props: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async ({ username, password }: { username: string; password: string }) => {
-      const response = await apiRequest("POST", "/api/auth/login", { username, password });
+      const response = await apiRequest("POST", "/api/mongodb/auth/login", { username, password });
       const data = await response.json();
       return data.user;
     },
     onSuccess: (user) => {
       // Clear any cached data first
-      queryClient.removeQueries({ queryKey: ["/api/auth/me"] });
+      queryClient.removeQueries({ queryKey: ["/api/mongodb/auth/me"] });
       // Set fresh user data with correct structure
-      queryClient.setQueryData(["/api/auth/me"], { user });
+      queryClient.setQueryData(["/api/mongodb/auth/me"], { user });
       // Force immediate refetch to ensure consistency
       refetch();
     },
@@ -54,11 +54,11 @@ export function AuthProvider(props: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/auth/logout");
+      await apiRequest("POST", "/api/mongodb/auth/logout");
     },
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: ["/api/auth/me"] });
-      queryClient.setQueryData(["/api/auth/me"], null);
+      queryClient.removeQueries({ queryKey: ["/api/mongodb/auth/me"] });
+      queryClient.setQueryData(["/api/mongodb/auth/me"], null);
       queryClient.clear();
     },
   });

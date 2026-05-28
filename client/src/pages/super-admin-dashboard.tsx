@@ -92,14 +92,14 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
   // Get current EAT date
   const { data: currentDate } = useQuery({
-    queryKey: ["/api/super-admin/current-eat-date"],
+    queryKey: ["/api/mongodb/super-admin/current-eat-date"],
   });
 
   // Get admins with credit balances
   const { data: admins = [], isLoading: adminsLoading, refetch: refetchAdmins } = useQuery({
-    queryKey: ["/api/super-admin/admins"],
+    queryKey: ["/api/mongodb/super-admin/admins"],
     queryFn: async () => {
-      const response = await fetch("/api/super-admin/admins");
+      const response = await fetch("/api/mongodb/super-admin/admins");
       if (!response.ok) throw new Error("Failed to fetch admins");
       return response.json();
     },
@@ -107,14 +107,14 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
   // Get Super Admin revenues with date and admin filtering
   const { data: revenues = [], isLoading: revenuesLoading, refetch: refetchRevenues } = useQuery({
-    queryKey: ["/api/super-admin/revenues", dateFrom, dateTo, selectedAdminFilter],
+    queryKey: ["/api/mongodb/super-admin/revenues", dateFrom, dateTo, selectedAdminFilter],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (dateFrom) params.append("dateFrom", dateFrom);
       if (dateTo) params.append("dateTo", dateTo);
       if (selectedAdminFilter) params.append("adminId", selectedAdminFilter);
       
-      const response = await fetch(`/api/super-admin/revenues?${params}`);
+      const response = await fetch(`/api/mongodb/super-admin/revenues?${params}`);
       if (!response.ok) throw new Error("Failed to fetch revenues");
       return response.json();
     },
@@ -122,13 +122,13 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
   // Get total revenue
   const { data: totalRevenue } = useQuery({
-    queryKey: ["/api/super-admin/revenue-total", dateFrom, dateTo],
+    queryKey: ["/api/mongodb/super-admin/revenue-total", dateFrom, dateTo],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (dateFrom) params.append("dateFrom", dateFrom);
       if (dateTo) params.append("dateTo", dateTo);
       
-      const response = await fetch(`/api/super-admin/revenue-total?${params}`);
+      const response = await fetch(`/api/mongodb/super-admin/revenue-total?${params}`);
       if (!response.ok) throw new Error("Failed to fetch total revenue");
       return response.json();
     },
@@ -136,13 +136,13 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
   // Get daily summaries
   const { data: dailySummaries = [] } = useQuery({
-    queryKey: ["/api/super-admin/daily-summaries", dateFrom, dateTo],
+    queryKey: ["/api/mongodb/super-admin/daily-summaries", dateFrom, dateTo],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (dateFrom) params.append("dateFrom", dateFrom);
       if (dateTo) params.append("dateTo", dateTo);
       
-      const response = await fetch(`/api/super-admin/daily-summaries?${params}`);
+      const response = await fetch(`/api/mongodb/super-admin/daily-summaries?${params}`);
       if (!response.ok) throw new Error("Failed to fetch daily summaries");
       return response.json();
     },
@@ -150,9 +150,9 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
   // Get pending credit requests
   const { data: creditRequests = [], isLoading: creditRequestsLoading, refetch: refetchCreditRequests } = useQuery({
-    queryKey: ["/api/admin/credit-loads"],
+    queryKey: ["/api/mongodb/admin/credit-loads"],
     queryFn: async () => {
-      const response = await fetch("/api/admin/credit-loads");
+      const response = await fetch("/api/mongodb/admin/credit-loads");
       if (!response.ok) throw new Error("Failed to fetch credit requests");
       return response.json();
     },
@@ -160,9 +160,9 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
   // Get withdrawal requests
   const { data: withdrawalRequests = [], isLoading: withdrawalsLoading, refetch: refetchWithdrawals } = useQuery({
-    queryKey: ["/api/withdrawal-requests"],
+    queryKey: ["/api/mongodb/withdrawal-requests"],
     queryFn: async () => {
-      const response = await fetch("/api/withdrawal-requests");
+      const response = await fetch("/api/mongodb/withdrawal-requests");
       if (!response.ok) throw new Error("Failed to fetch withdrawal requests");
       return response.json();
     },
@@ -171,8 +171,8 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
   // Filter handling functions
   const handleDateFilter = () => {
     refetchRevenues();
-    queryClient.invalidateQueries({ queryKey: ["/api/super-admin/revenue-total"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/super-admin/daily-summaries"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/mongodb/super-admin/revenue-total"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/mongodb/super-admin/daily-summaries"] });
   };
 
   const clearDateFilter = () => {
@@ -180,14 +180,14 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
     setDateTo("");
     setSelectedAdminFilter("");
     refetchRevenues();
-    queryClient.invalidateQueries({ queryKey: ["/api/super-admin/revenue-total"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/super-admin/daily-summaries"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/mongodb/super-admin/revenue-total"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/mongodb/super-admin/daily-summaries"] });
   };
 
   // Daily reset mutation
   const dailyResetMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch("/api/super-admin/daily-reset", {
+      const response = await fetch("/api/mongodb/super-admin/daily-reset", {
         method: "POST",
       });
       if (!response.ok) throw new Error("Failed to perform daily reset");
@@ -199,8 +199,8 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
         description: "All daily data has been reset successfully.",
       });
       refetchRevenues();
-      queryClient.invalidateQueries({ queryKey: ["/api/super-admin/revenue-total"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/super-admin/daily-summaries"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/super-admin/revenue-total"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/super-admin/daily-summaries"] });
     },
     onError: (error) => {
       toast({
@@ -214,7 +214,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
   // Credit load mutations
   const approveCreditMutation = useMutation({
     mutationFn: async (loadId: number) => {
-      const response = await fetch(`/api/admin/credit-loads/${loadId}/approve`, {
+      const response = await fetch(`/api/mongodb/admin/credit-loads/${loadId}/approve`, {
         method: "PATCH",
       });
       if (!response.ok) throw new Error("Failed to approve credit load");
@@ -232,7 +232,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
   const rejectCreditMutation = useMutation({
     mutationFn: async (loadId: number) => {
-      const response = await fetch(`/api/admin/credit-loads/${loadId}/reject`, {
+      const response = await fetch(`/api/mongodb/admin/credit-loads/${loadId}/reject`, {
         method: "PATCH",
       });
       if (!response.ok) throw new Error("Failed to reject credit load");
@@ -250,7 +250,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
   // Withdrawal mutations
   const approveWithdrawalMutation = useMutation({
     mutationFn: async (requestId: number) => {
-      const response = await fetch(`/api/withdrawal-requests/${requestId}/approve`, {
+      const response = await fetch(`/api/mongodb/withdrawal-requests/${requestId}/approve`, {
         method: "PATCH",
       });
       if (!response.ok) throw new Error("Failed to approve withdrawal");
@@ -267,7 +267,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
   const rejectWithdrawalMutation = useMutation({
     mutationFn: async (requestId: number) => {
-      const response = await fetch(`/api/withdrawal-requests/${requestId}/reject`, {
+      const response = await fetch(`/api/mongodb/withdrawal-requests/${requestId}/reject`, {
         method: "PATCH",
       });
       if (!response.ok) throw new Error("Failed to reject withdrawal");
@@ -285,7 +285,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
   // Admin management mutations
   const createAdminMutation = useMutation({
     mutationFn: async (adminData: any) => {
-      const response = await fetch("/api/super-admin/admins", {
+      const response = await fetch("/api/mongodb/super-admin/admins", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(adminData),
@@ -305,7 +305,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
   const updateAdminMutation = useMutation({
     mutationFn: async ({ adminId, data }: { adminId: number; data: any }) => {
-      const response = await fetch(`/api/super-admin/admins/${adminId}`, {
+      const response = await fetch(`/api/mongodb/super-admin/admins/${adminId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -325,7 +325,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
   const toggleAdminStatusMutation = useMutation({
     mutationFn: async ({ adminId, action }: { adminId: number; action: string }) => {
-      const response = await fetch(`/api/super-admin/admins/${adminId}/${action}`, {
+      const response = await fetch(`/api/mongodb/super-admin/admins/${adminId}/${action}`, {
         method: "PATCH",
       });
       if (!response.ok) throw new Error(`Failed to ${action} admin`);
