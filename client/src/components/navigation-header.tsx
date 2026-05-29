@@ -50,7 +50,7 @@ export function NavigationHeader({ user, title, onLogout }: NavigationHeaderProp
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
               <Dice1 className="h-8 w-8 text-primary mr-3" />
-              <h1 className="text-xl font-semibold text-gray-900">BingoSaaS</h1>
+              <h1 className="text-xl font-semibold text-gray-900">ZemenBingo</h1>
             </div>
             <div className="ml-8">
               {getRoleBadge(user?.role || '')}
