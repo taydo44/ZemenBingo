@@ -206,7 +206,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Shop data query with frequent refresh for real-time profit margin updates
   const { data: shopData } = useQuery({
-    queryKey: ['/api/mongodb/shops/${user?.shopId}'],
+    queryKey: [`/api/mongodb/shops/${user?.shopId}`],
     enabled: !!user?.shopId,
     refetchInterval: 60000 // Refresh every 60 seconds to catch admin changes
   });
@@ -246,7 +246,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     queryKey: ['/api/mongodb/users', (shopData as any)?.adminId],
     queryFn: async () => {
       if (!(shopData as any)?.adminId) return null;
-      const response = await fetch('/api/mongodb/users/${(shopData as any).adminId}`);
+      const response = await fetch(`/api/mongodb/users/${(shopData as any).adminId}`);
       if (!response.ok) return null;
       return response.json();
     },
@@ -259,7 +259,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     queryKey: ['/api/mongodb/cartelas', user?.shopId],
     queryFn: async () => {
       if (!user?.shopId) return [];
-      const response = await fetch('/api/mongodb/cartelas/${user.shopId}`);
+      const response = await fetch(`/api/mongodb/cartelas/${user.shopId}`);
       if (!response.ok) return [];
       return response.json();
     },
@@ -636,7 +636,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Call the API to add the number
       setTimeout(async () => {
         try {
-          const response = await fetch('/api/mongodb/games/${activeGameId}/numbers`, {
+          const response = await fetch(`/api/mongodb/games/${activeGameId}/numbers`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ number: numberToCall })
@@ -729,7 +729,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setPauseOperationInProgress(true);
       
       // Call backend to pause the game
-      const response = await fetch('/api/mongodb/games/${activeGameId}/pause`, {
+      const response = await fetch(`/api/mongodb/games/${activeGameId}/pause`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isPaused: true })
@@ -996,7 +996,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Start game mutation
   const startGameMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/mongodb/games/${activeGameId}/start`, {
+      const response = await fetch(`/api/mongodb/games/${activeGameId}/start`, {
         method: 'PATCH'
       });
       if (!response.ok) throw new Error('Failed to start game');
@@ -1052,7 +1052,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Call number mutation
   const callNumberMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/mongodb/games/${activeGameId}/numbers`, {
+      const response = await fetch(`/api/mongodb/games/${activeGameId}/numbers`, {
         method: 'PATCH'
       });
       if (!response.ok) throw new Error('Failed to call number');
@@ -1328,7 +1328,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Invalidate queries to force refresh and clear called numbers from cache
       queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
       queryClient.invalidateQueries({ queryKey: ['/api/mongodb/cartelas', user?.shopId] });
-      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/cartelas/${user?.shopId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/mongodb/cartelas/${user?.shopId}`] });
       
       toast({
         title: "Reset Complete",
@@ -1571,7 +1571,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
     // Check winner using API with actual cartela data
     try {
-      const response = await fetch('/api/mongodb/games/${activeGameId}/check-winner`, {
+      const response = await fetch(`/api/mongodb/games/${activeGameId}/check-winner`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1689,7 +1689,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             calledNumbers: calledNumbers.length
           };
           
-          await fetch('/api/mongodb/games/${activeGameId}/declare-winner`, {
+          await fetch(`/api/mongodb/games/${activeGameId}/declare-winner`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1704,7 +1704,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           });
           
           // Mark game as completed to save to history
-          await fetch('/api/mongodb/games/${activeGameId}/complete`, {
+          await fetch(`/api/mongodb/games/${activeGameId}/complete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1781,7 +1781,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     
     try {
       // Call backend to pause the game
-      const response = await fetch('/api/mongodb/games/${activeGameId}/pause`, {
+      const response = await fetch(`/api/mongodb/games/${activeGameId}/pause`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isPaused: true })
@@ -1883,7 +1883,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       console.log(`▶️ RESUMING GAME: activeGameId=${activeGameId}, gamePaused=${gamePaused}`);
       
       // Call backend to resume the game
-      const response = await fetch('/api/mongodb/games/${activeGameId}/pause`, {
+      const response = await fetch(`/api/mongodb/games/${activeGameId}/pause`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isPaused: false })
