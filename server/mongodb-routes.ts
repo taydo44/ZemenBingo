@@ -579,12 +579,11 @@ export function registerMongoDBRoutes(app: Express): void {
           shopId: req.session.user.shopId,
           status: "completed",
         });
+        const mongoose = await import("mongoose");
         const revenue = await Transaction.aggregate([
           {
             $match: {
-              shopId: new (require("mongoose").Types.ObjectId)(
-                req.session.user.shopId
-              ),
+              shopId: new mongoose.Types.ObjectId(req.session.user.shopId),
               type: "revenue",
             },
           },
