@@ -62,7 +62,7 @@ export function AdminReferralCommissions({ adminId }: AdminReferralCommissionsPr
   const { data: systemSettings = {} } = useQuery({
     queryKey: ['admin-system-settings'],
     queryFn: async () => {
-      const response = await fetch('/api/admin/system-settings');
+      const response = await fetch('/api/mongodb/admin/system-settings');
       if (!response.ok) throw new Error('Failed to fetch system settings');
       return response.json();
     }
@@ -117,7 +117,7 @@ export function AdminReferralCommissions({ adminId }: AdminReferralCommissionsPr
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['referral-commissions'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/credit/balance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/credit/balance'] });
       setShowConvertDialog(false);
       setConvertAmount("");
       toast({

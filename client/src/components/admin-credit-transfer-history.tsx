@@ -45,7 +45,7 @@ export function AdminCreditTransferHistory({ adminId }: AdminCreditTransferHisto
 
   // Get current admin info from auth context or props
   const { data: currentAdmin } = useQuery({
-    queryKey: ['/api/auth/me'],
+    queryKey: ['/api/mongodb/auth/me'],
     enabled: true
   });
 

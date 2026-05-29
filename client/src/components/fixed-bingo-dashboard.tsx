@@ -51,13 +51,13 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
   
   // Active game query
   const { data: activeGame } = useQuery({
-    queryKey: ['/api/games/active'],
+    queryKey: ['/api/mongodb/games/active'],
     refetchInterval: 2000
   });
 
   // Shop data query
   const { data: shopData } = useQuery({
-    queryKey: ['/api/shops', user?.shopId],
+    queryKey: ['/api/mongodb/shops', user?.shopId],
     enabled: !!user?.shopId
   });
 
@@ -246,7 +246,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
   // Create game mutation
   const createGameMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/games', {
+      const response = await fetch('/api/mongodb/games', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -265,7 +265,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
       setLastCalledNumber(null);
       setBookedCartelas(new Set(selectedCartelas));
       setSelectedCartelas(new Set());
-      queryClient.invalidateQueries({ queryKey: ['/api/credit/balance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/credit/balance'] });
       toast({
         title: "Game Created",
         description: `Game created with ${Array.from(selectedCartelas).length} cartelas`
@@ -352,7 +352,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
           })
         });
         
-        queryClient.invalidateQueries({ queryKey: ['/api/credit/balance'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/mongodb/credit/balance'] });
       } catch (error) {
         console.error('Failed to declare winner:', error);
       }

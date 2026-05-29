@@ -60,13 +60,13 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
   
   // User balance query
   const { data: balance } = useQuery({
-    queryKey: ['/api/credit/balance'],
+    queryKey: ['/api/mongodb/credit/balance'],
     refetchInterval: 5000
   });
 
   // Shop data query
   const { data: shopData } = useQuery({
-    queryKey: ['/api/shops', user?.shopId],
+    queryKey: ['/api/mongodb/shops', user?.shopId],
     enabled: !!user?.shopId
   });
 
@@ -237,7 +237,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
   // Create game mutation
   const createGameMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/games', {
+      const response = await fetch('/api/mongodb/games', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -256,7 +256,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
       setLastCalledNumber(null);
       setBookedCartelas(new Set(selectedCartelas));
       setSelectedCartelas(new Set());
-      queryClient.invalidateQueries({ queryKey: ['/api/credit/balance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/credit/balance'] });
       toast({
         title: "Game Created",
         description: `Game created with ${Array.from(selectedCartelas).length} cartelas`
@@ -313,7 +313,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
 
     // Check winner using API with actual cartela data from database
     try {
-      const response = await fetch('/api/games/check-winner', {
+      const response = await fetch('/api/mongodb/games/check-winner', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -365,7 +365,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
             })
           });
           
-          queryClient.invalidateQueries({ queryKey: ['/api/credit/balance'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/mongodb/credit/balance'] });
         } catch (error) {
           console.error('Failed to declare winner:', error);
         }

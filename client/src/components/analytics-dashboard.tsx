@@ -24,31 +24,31 @@ export default function AnalyticsDashboard({ shopId }: AnalyticsDashboardProps) 
 
   // Get shops list for super admin
   const { data: shops } = useQuery({
-    queryKey: ['/api/shops'],
+    queryKey: ['/api/mongodb/shops'],
     enabled: user?.role === 'super_admin'
   });
 
   // Get comprehensive shop analytics
   const { data: shopAnalytics, refetch: refetchShopAnalytics } = useQuery({
-    queryKey: ['/api/analytics/shop', selectedShop || user?.shopId, { startDate, endDate }],
+    queryKey: ['/api/mongodb/analytics/shop', selectedShop || user?.shopId, { startDate, endDate }],
     enabled: !!(selectedShop || user?.shopId)
   });
 
   // Get profit distribution (super admin only)
   const { data: profitDistribution } = useQuery({
-    queryKey: ['/api/analytics/profit-distribution', { startDate, endDate }],
+    queryKey: ['/api/mongodb/analytics/profit-distribution', { startDate, endDate }],
     enabled: user?.role === 'super_admin'
   });
 
   // Get financial trends
   const { data: trends } = useQuery({
-    queryKey: ['/api/analytics/trends', { shopId: selectedShop, period: dateRange }],
+    queryKey: ['/api/mongodb/analytics/trends', { shopId: selectedShop, period: dateRange }],
     enabled: !!(selectedShop || user?.shopId)
   });
 
   // Get employee performance
   const { data: employeePerformance } = useQuery({
-    queryKey: ['/api/analytics/employee-performance', { shopId: selectedShop, startDate, endDate }],
+    queryKey: ['/api/mongodb/analytics/employee-performance', { shopId: selectedShop, startDate, endDate }],
     enabled: !!(selectedShop || user?.shopId)
   });
 

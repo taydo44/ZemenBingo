@@ -27,7 +27,7 @@ export function AdminCreditLoadHistory() {
   const [isImageLoading, setIsImageLoading] = useState(false);
 
   const { data: creditLoads = [], isLoading, refetch } = useQuery({
-    queryKey: ['/api/credit/loads/admin'],
+    queryKey: ['/api/mongodb/credit/loads/admin'],
     enabled: true,
     staleTime: 0,
     cacheTime: 0,

@@ -46,13 +46,13 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
 
   // Get active game
   const { data: activeGame, refetch: refetchActiveGame } = useQuery({
-    queryKey: ['/api/games/active'],
+    queryKey: ['/api/mongodb/games/active'],
     enabled: !!user
   });
 
   // Get admin commission rate from user profile or system settings
   const { data: adminSettings } = useQuery({
-    queryKey: ['/api/admin/shop-stats'],
+    queryKey: ['/api/mongodb/admin/shop-stats'],
     enabled: !!user,
     refetchInterval: 5000 // Update every 5 seconds
   });
@@ -64,7 +64,7 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
 
   // Get game players
   const { data: gamePlayers, refetch: refetchPlayers } = useQuery({
-    queryKey: ['/api/games', currentGame?.id, 'players'],
+    queryKey: ['/api/mongodb/games', currentGame?.id, 'players'],
     enabled: !!currentGame?.id
   });
 
@@ -76,7 +76,7 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
     }),
     onSuccess: (game) => {
       setCurrentGame(game);
-      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
       toast({
         title: "Game Created",
         description: "New bingo game has been created successfully"
@@ -111,7 +111,7 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
     }),
     onSuccess: () => {
       setGameActive(true);
-      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
       toast({
         title: "Game Started",
         description: "Bingo game has started successfully"
@@ -127,7 +127,7 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
         body: JSON.stringify({ calledNumbers: data.calledNumbers })
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
     }
   });
 
@@ -198,7 +198,7 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
       setGameActive(false);
       setGameFinished(true);
       setCurrentGame(null);
-      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
       toast({
         title: "Game Completed",
         description: "Game has been completed and winner has been recorded"

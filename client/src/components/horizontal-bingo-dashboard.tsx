@@ -54,18 +54,18 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
 
   // Fetch current user
   const { data: user } = useQuery({
-    queryKey: ['/api/auth/me'],
+    queryKey: ['/api/mongodb/auth/me'],
   }) as { data: { id: number; shopId: number; role: string } | undefined };
 
   // Fetch admin stats for profit margin
   const { data: adminStats } = useQuery({
-    queryKey: ['/api/admin/shop-stats'],
+    queryKey: ['/api/mongodb/admin/shop-stats'],
     refetchInterval: 5000,
   });
 
   // Fetch active game
   const { data: activeGame } = useQuery({
-    queryKey: ['/api/games/active'],
+    queryKey: ['/api/mongodb/games/active'],
     refetchInterval: 2000,
   });
 
@@ -134,7 +134,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   // Create game mutation
   const createGameMutation = useMutation({
     mutationFn: async (data: { shopId: number; employeeId: number; entryFee: string }) => {
-      const response = await fetch('/api/games', {
+      const response = await fetch('/api/mongodb/games', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -149,7 +149,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
         title: "Game Created",
         description: `New game started with ID: ${newGame.id}`,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
     }
   });
 
@@ -190,7 +190,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
         title: "Game Started",
         description: "Bingo game is now active!",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
     }
   });
 

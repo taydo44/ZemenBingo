@@ -36,7 +36,7 @@ export function SuperAdminWithdrawalPanel() {
   const { data: withdrawalRequests = [], isLoading } = useQuery({
     queryKey: ['withdrawal-requests'],
     queryFn: async () => {
-      const response = await fetch('/api/withdrawal-requests');
+      const response = await fetch('/api/mongodb/withdrawal-requests');
       if (!response.ok) throw new Error('Failed to fetch withdrawal requests');
       return response.json();
     }

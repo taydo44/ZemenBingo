@@ -200,13 +200,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   
   // Active game query
   const { data: activeGame } = useQuery({
-    queryKey: ['/api/games/active'],
+    queryKey: ['/api/mongodb/games/active'],
     refetchInterval: gameActive ? 5000 : 30000 // More frequent polling during active games
   });
 
   // Shop data query with frequent refresh for real-time profit margin updates
   const { data: shopData } = useQuery({
-    queryKey: [`/api/shops/${user?.shopId}`],
+    queryKey: ['/api/mongodb/shops/${user?.shopId}'],
     enabled: !!user?.shopId,
     refetchInterval: 60000 // Refresh every 60 seconds to catch admin changes
   });
@@ -236,17 +236,17 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Game history query for admin connection
   const { data: gameHistory } = useQuery({
-    queryKey: ['/api/analytics/shop', user?.shopId],
+    queryKey: ['/api/mongodb/analytics/shop', user?.shopId],
     enabled: !!user?.shopId,
     refetchInterval: 20000 // Refresh every 20 seconds for live updates
   });
 
   // Admin credit balance query
   const { data: adminData } = useQuery({
-    queryKey: ['/api/users', (shopData as any)?.adminId],
+    queryKey: ['/api/mongodb/users', (shopData as any)?.adminId],
     queryFn: async () => {
       if (!(shopData as any)?.adminId) return null;
-      const response = await fetch(`/api/users/${(shopData as any).adminId}`);
+      const response = await fetch('/api/mongodb/users/${(shopData as any).adminId}`);
       if (!response.ok) return null;
       return response.json();
     },
@@ -256,10 +256,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Cartelas query for real-time updates
   const { data: cartelas, refetch: refetchCartelas } = useQuery({
-    queryKey: ['/api/cartelas', user?.shopId],
+    queryKey: ['/api/mongodb/cartelas', user?.shopId],
     queryFn: async () => {
       if (!user?.shopId) return [];
-      const response = await fetch(`/api/cartelas/${user.shopId}`);
+      const response = await fetch('/api/mongodb/cartelas/${user.shopId}`);
       if (!response.ok) return [];
       return response.json();
     },
@@ -636,7 +636,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Call the API to add the number
       setTimeout(async () => {
         try {
-          const response = await fetch(`/api/games/${activeGameId}/numbers`, {
+          const response = await fetch('/api/mongodb/games/${activeGameId}/numbers`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ number: numberToCall })
@@ -729,7 +729,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setPauseOperationInProgress(true);
       
       // Call backend to pause the game
-      const response = await fetch(`/api/games/${activeGameId}/pause`, {
+      const response = await fetch('/api/mongodb/games/${activeGameId}/pause`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isPaused: true })
@@ -759,7 +759,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         setAudioPlaying(false);
         
         // Force refresh active game state to prevent state corruption
-        queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
         
         toast({
           title: "Game Paused",
@@ -879,7 +879,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Create game mutation
   const createGameMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/games', {
+      const response = await fetch('/api/mongodb/games', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -898,7 +898,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setLastCalledNumber(null);
       setBookedCartelas(new Set(selectedCartelas));
       // Keep selectedCartelas for validation during the game
-      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
       toast({
         title: "Game Created",
         description: `Game created with ${Array.from(selectedCartelas).length} cartelas`
@@ -919,7 +919,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       const cartela = (cartelas || []).find((c: any) => c.cartelaNumber === cartelaNumber);
       if (!cartela) throw new Error('Cartela not found');
       
-      const response = await fetch('/api/employees/mark-cartela', {
+      const response = await fetch('/api/mongodb/employees/mark-cartela', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -957,7 +957,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       const cartela = (cartelas || []).find((c: any) => c.cartelaNumber === cartelaNumber);
       if (!cartela) throw new Error('Cartela not found');
       
-      const response = await fetch('/api/employees/unmark-cartela', {
+      const response = await fetch('/api/mongodb/employees/unmark-cartela', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -996,7 +996,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Start game mutation
   const startGameMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(`/api/games/${activeGameId}/start`, {
+      const response = await fetch('/api/mongodb/games/${activeGameId}/start`, {
         method: 'PATCH'
       });
       if (!response.ok) throw new Error('Failed to start game');
@@ -1013,7 +1013,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setActiveGameId(data.id);
       setCalledNumbers([]); // Clear any previous numbers when starting
       setLastCalledNumber(null);
-      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
       
       // Play game start sound
       try {
@@ -1052,7 +1052,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Call number mutation
   const callNumberMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(`/api/games/${activeGameId}/numbers`, {
+      const response = await fetch('/api/mongodb/games/${activeGameId}/numbers`, {
         method: 'PATCH'
       });
       if (!response.ok) throw new Error('Failed to call number');
@@ -1061,7 +1061,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     onSuccess: (data) => {
       const newNumber = data.calledNumber;
       setLastCalledNumber(newNumber);
-      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
       
       // Update the full called numbers list
       const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
@@ -1259,7 +1259,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     mutationFn: async () => {
       // For reset operations, we don't need a specific game ID
       // Just clear all cartela states and reset the frontend
-      const response = await fetch('/api/cartelas/reset', {
+      const response = await fetch('/api/mongodb/cartelas/reset', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -1326,9 +1326,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
       
       // Invalidate queries to force refresh and clear called numbers from cache
-      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/cartelas', user?.shopId] });
-      queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/cartelas', user?.shopId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mongodb/cartelas/${user?.shopId}`] });
       
       toast({
         title: "Reset Complete",
@@ -1337,7 +1337,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       // Force immediate refetch to ensure fresh data and visual update
       setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ['/api/games/active'] });
+        queryClient.refetchQueries({ queryKey: ['/api/mongodb/games/active'] });
         // Force re-render by triggering state update MULTIPLE times to ensure UI updates
         setCalledNumbers([]);
         setMarkedNumbers([]);
@@ -1571,7 +1571,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
     // Check winner using API with actual cartela data
     try {
-      const response = await fetch(`/api/games/${activeGameId}/check-winner`, {
+      const response = await fetch('/api/mongodb/games/${activeGameId}/check-winner`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1689,7 +1689,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             calledNumbers: calledNumbers.length
           };
           
-          await fetch(`/api/games/${activeGameId}/declare-winner`, {
+          await fetch('/api/mongodb/games/${activeGameId}/declare-winner`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1704,7 +1704,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           });
           
           // Mark game as completed to save to history
-          await fetch(`/api/games/${activeGameId}/complete`, {
+          await fetch('/api/mongodb/games/${activeGameId}/complete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1719,10 +1719,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           // Manual reset required via reset button
           
           // Invalidate all related queries to update admin dashboard
-          queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
-          queryClient.invalidateQueries({ queryKey: ['/api/analytics/shop'] });
-          queryClient.invalidateQueries({ queryKey: ['/api/analytics/trends'] });
-          queryClient.invalidateQueries({ queryKey: ['/api/analytics/profit-distribution'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/mongodb/analytics/shop'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/mongodb/analytics/trends'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/mongodb/analytics/profit-distribution'] });
           
           // Play winner sound
           try {
@@ -1781,7 +1781,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     
     try {
       // Call backend to pause the game
-      const response = await fetch(`/api/games/${activeGameId}/pause`, {
+      const response = await fetch('/api/mongodb/games/${activeGameId}/pause`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isPaused: true })
@@ -1883,7 +1883,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       console.log(`▶️ RESUMING GAME: activeGameId=${activeGameId}, gamePaused=${gamePaused}`);
       
       // Call backend to resume the game
-      const response = await fetch(`/api/games/${activeGameId}/pause`, {
+      const response = await fetch('/api/mongodb/games/${activeGameId}/pause`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isPaused: false })
@@ -1908,7 +1908,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         }
         
         // Force refresh active game state to prevent state corruption
-        queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
         
         toast({
           title: "Game Resumed",
@@ -2400,7 +2400,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                         setIsHovering(false);
                         setNextNumber(null);
                         
-                        queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+                        queryClient.invalidateQueries({ queryKey: ['/api/mongodb/games/active'] });
                       }}
                       className="bg-blue-500 hover:bg-blue-600 text-white"
                     >
