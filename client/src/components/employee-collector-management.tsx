@@ -51,7 +51,7 @@ export function EmployeeCollectorManagement({ user }: { user: User }) {
   // Reset cartelas mutation
   const resetCartelasMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch("/api/cartelas/reset", {
+      const response = await fetch("/api/mongodb/cartelas/reset", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ shopId: user.shopId }),
@@ -114,7 +114,7 @@ export function EmployeeCollectorManagement({ user }: { user: User }) {
   // Create collector mutation
   const createCollectorMutation = useMutation({
     mutationFn: async (data: CreateCollectorData) => {
-      const response = await fetch("/api/employees/create-collector", {
+      const response = await fetch("/api/mongodb/employees/create-collector", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

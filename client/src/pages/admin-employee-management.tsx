@@ -45,24 +45,24 @@ export default function AdminEmployeeManagement() {
 
   // Fetch employees in admin's shops
   const { data: employees = [], isLoading: employeesLoading } = useQuery({
-    queryKey: ["/api/users/shop"],
+    queryKey: ["/api/mongodb/users/shop"],
     select: (data: any[]) => data.filter((user: any) => user.role === "employee")
   });
 
   // Fetch admin's shops
   const { data: shops = [], isLoading: shopsLoading } = useQuery({
-    queryKey: ["/api/admin/shops"]
+    queryKey: ["/api/mongodb/admin/shops"]
   });
 
   // Fetch employee profit margins
   const { data: profitMargins = [], isLoading: marginsLoading } = useQuery({
-    queryKey: ["/api/admin/employee-profit-margins"]
+    queryKey: ["/api/mongodb/admin/employee-profit-margins"]
   });
 
   // Update employee password mutation
   const updatePasswordMutation = useMutation({
     mutationFn: async ({ employeeId, newPassword }: { employeeId: number; newPassword: string }) => {
-      return apiRequest(`/api/admin/employees/${employeeId}/password`, "PATCH", { newPassword });
+      return apiRequest(`/api/mongodb/admin/employees/${employeeId}/password`, "PATCH", { newPassword });
     },
     onSuccess: () => {
       toast({
@@ -85,7 +85,7 @@ export default function AdminEmployeeManagement() {
   // Set/Update profit margin mutation
   const setProfitMarginMutation = useMutation({
     mutationFn: async (data: { employeeId: number; shopId: number; profitMargin: string }) => {
-      return apiRequest("/api/admin/employee-profit-margins", "POST", data);
+      return apiRequest("/api/mongodb/admin/employee-profit-margins", "POST", data);
     },
     onSuccess: () => {
       toast({
@@ -96,7 +96,7 @@ export default function AdminEmployeeManagement() {
       setNewProfitMargin("");
       setSelectedShopForMargin(null);
       setSelectedEmployeeForMargin(null);
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/employee-profit-margins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/admin/employee-profit-margins"] });
     },
     onError: (error: any) => {
       toast({
@@ -110,14 +110,14 @@ export default function AdminEmployeeManagement() {
   // Update existing profit margin mutation
   const updateProfitMarginMutation = useMutation({
     mutationFn: async ({ marginId, profitMargin }: { marginId: number; profitMargin: string }) => {
-      return apiRequest(`/api/admin/employee-profit-margins/${marginId}`, "PATCH", { profitMargin });
+      return apiRequest(`/api/mongodb/admin/employee-profit-margins/${marginId}`, "PATCH", { profitMargin });
     },
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Profit margin updated successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/employee-profit-margins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/admin/employee-profit-margins"] });
     },
     onError: (error: any) => {
       toast({

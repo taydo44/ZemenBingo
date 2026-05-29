@@ -28,7 +28,7 @@ export function GameManagement({
     if (!user?.shopId) return;
 
     try {
-      await apiRequest("POST", "/api/games", {
+      await apiRequest("POST", "/api/mongodb/games", {
         shopId: user.shopId,
         employeeId: user.id,
         status: 'waiting',

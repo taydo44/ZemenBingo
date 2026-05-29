@@ -17,12 +17,12 @@ export function RetailReport() {
   const [order, setOrder] = useState("DESC");
 
   const { data: reportData = [], refetch } = useQuery({
-    queryKey: ["/api/reports/retail", user?.shopId, dateFrom, dateTo, sortBy, order],
+    queryKey: ["/api/mongodb/reports/retail", user?.shopId, dateFrom, dateTo, sortBy, order],
     enabled: !!user?.shopId,
   });
 
   const { data: summary } = useQuery({
-    queryKey: ["/api/reports/summary", user?.shopId, dateFrom, dateTo],
+    queryKey: ["/api/mongodb/reports/summary", user?.shopId, dateFrom, dateTo],
     enabled: !!user?.shopId,
   });
 

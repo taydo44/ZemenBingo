@@ -70,7 +70,7 @@ export function AdminCreationForm({ onSuccess }: AdminCreationFormProps) {
       });
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/mongodb/super-admin/admins"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/shops"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/shops"] });
       onSuccess?.();
     },
     onError: (error: any) => {

@@ -28,7 +28,7 @@ export default function CustomCartelaBuilder({ shopId, adminId }: CustomCartelaB
   const queryClient = useQueryClient();
 
   const { data: customCartelas = [], refetch } = useQuery({
-    queryKey: ["/api/custom-cartelas", shopId],
+    queryKey: ["/api/mongodb/custom-cartelas", shopId],
     queryFn: async () => {
       const response = await fetch(`/api/custom-cartelas/${shopId}`);
       return response.json();
@@ -37,7 +37,7 @@ export default function CustomCartelaBuilder({ shopId, adminId }: CustomCartelaB
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch("/api/custom-cartelas", {
+      const response = await fetch("/api/mongodb/custom-cartelas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -46,7 +46,7 @@ export default function CustomCartelaBuilder({ shopId, adminId }: CustomCartelaB
     },
     onSuccess: () => {
       toast({ title: "Custom cartela created successfully!" });
-      queryClient.invalidateQueries({ queryKey: ["/api/custom-cartelas", shopId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/custom-cartelas", shopId] });
       resetForm();
       setIsBuilderOpen(false);
     },
@@ -66,7 +66,7 @@ export default function CustomCartelaBuilder({ shopId, adminId }: CustomCartelaB
     },
     onSuccess: () => {
       toast({ title: "Custom cartela updated successfully!" });
-      queryClient.invalidateQueries({ queryKey: ["/api/custom-cartelas", shopId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/custom-cartelas", shopId] });
       resetForm();
       setIsBuilderOpen(false);
     },
@@ -84,7 +84,7 @@ export default function CustomCartelaBuilder({ shopId, adminId }: CustomCartelaB
     },
     onSuccess: () => {
       toast({ title: "Custom cartela deleted successfully!" });
-      queryClient.invalidateQueries({ queryKey: ["/api/custom-cartelas", shopId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/custom-cartelas", shopId] });
     },
     onError: () => {
       toast({ title: "Failed to delete custom cartela", variant: "destructive" });

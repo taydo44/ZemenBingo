@@ -55,7 +55,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   
   // Fetch ALL shops and find the employee's shop for real-time profit margin
   const { data: allShops } = useQuery({
-    queryKey: ["/api/shops"],
+    queryKey: ["/api/mongodb/shops"],
     refetchInterval: 1000,
     refetchIntervalInBackground: true,
     staleTime: 0,
@@ -74,7 +74,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
         entryFee: gameAmount,
         prizePool: "0.00"
       });
-      const response = await apiRequest("POST", "/api/games", {
+      const response = await apiRequest("POST", "/api/mongodb/games", {
         shopId,
         employeeId,
         status: 'waiting',

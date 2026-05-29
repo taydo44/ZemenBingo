@@ -50,28 +50,28 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
 
   // Move all hooks before conditional returns to avoid hooks error
   const { data: employees = [], refetch: refetchEmployees, error: employeesError, isLoading: employeesLoading } = useQuery({
-    queryKey: ["/api/admin/employees"],
+    queryKey: ["/api/mongodb/admin/employees"],
     enabled: !!user && (user.role === 'admin' || user.role === 'super_admin')
   });
 
   const { data: shopStats, error: statsError, isLoading: statsLoading } = useQuery({
-    queryKey: ["/api/admin/shop-stats"],
+    queryKey: ["/api/mongodb/admin/shop-stats"],
     enabled: !!user && (user.role === 'admin' || user.role === 'super_admin')
   });
 
   const { data: creditBalance, error: balanceError, isLoading: balanceLoading, refetch: refetchBalance } = useQuery({
-    queryKey: ["/api/credit/balance"],
+    queryKey: ["/api/mongodb/credit/balance"],
     enabled: !!user && (user.role === 'admin' || user.role === 'super_admin')
   });
 
   // Credit load mutation
   const loadCreditMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await apiRequest("POST", "/api/credit/load", data);
+      const response = await apiRequest("POST", "/api/mongodb/credit/load", data);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/credit/balance"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/credit/balance"] });
       setShowLoadDialog(false);
       setLoadAmount("");
       setLoadBankAccount("");
@@ -92,7 +92,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   // Credit transfer mutation
   const transferCreditMutation = useMutation({
     mutationFn: async (data: { amount: string; toAccountNumber: string }) => {
-      const response = await fetch("/api/credit/transfer", {
+      const response = await fetch("/api/mongodb/credit/transfer", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -108,7 +108,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/credit/balance"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/credit/balance"] });
       setShowTransferDialog(false);
       setTransferAmount("");
       setTransferRecipient("");
@@ -237,7 +237,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
     }
 
     try {
-      await apiRequest("PATCH", `/api/admin/employees/${employee.id}/password`, { newPassword });
+      await apiRequest("PATCH", `/api/mongodb/admin/employees/${employee.id}/password`, { newPassword });
       
       toast({
         title: "Success",

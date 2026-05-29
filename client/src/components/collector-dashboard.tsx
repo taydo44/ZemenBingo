@@ -75,7 +75,7 @@ export function CollectorDashboard({ user }: { user: User }) {
   // Logout function
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch("/api/mongodb/auth/logout", { method: "POST" });
       window.location.href = "/login";
     } catch (error) {
       toast({

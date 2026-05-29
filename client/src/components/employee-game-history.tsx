@@ -28,7 +28,7 @@ interface EmployeeGameHistoryProps {
 
 export function EmployeeGameHistory({ employeeId }: EmployeeGameHistoryProps) {
   const { data: gameHistory = [], isLoading } = useQuery<GameHistoryEntry[]>({
-    queryKey: ["/api/employee/game-history", employeeId],
+    queryKey: ["/api/mongodb/employee/game-history", employeeId],
   });
 
   if (isLoading) {

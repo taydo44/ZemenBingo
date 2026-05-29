@@ -32,7 +32,7 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
 
   // Load all cartelas for this shop
   const { data: cartelas = [], refetch, isLoading } = useQuery({
-    queryKey: ["/api/cartelas", shopId],
+    queryKey: ["/api/mongodb/cartelas", shopId],
     queryFn: async () => {
       const response = await fetch(`/api/cartelas/${shopId}`);
       if (!response.ok) throw new Error("Failed to load cartelas");
@@ -45,7 +45,7 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
   // Create or update cartela
   const saveCartelaMutation = useMutation({
     mutationFn: async (data: any) => {
-      const url = editingCartela ? `/api/cartelas/${editingCartela.id}` : "/api/cartelas";
+      const url = editingCartela ? `/api/cartelas/${editingCartela.id}` : "/api/mongodb/cartelas";
       const method = editingCartela ? "PUT" : "POST";
       
       const response = await fetch(url, {
@@ -58,7 +58,7 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
     },
     onSuccess: () => {
       toast({ title: editingCartela ? "Cartela updated successfully!" : "Cartela created successfully!" });
-      queryClient.invalidateQueries({ queryKey: ["/api/cartelas", shopId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/cartelas", shopId] });
       resetForm();
     },
     onError: (error: any) => {
@@ -76,7 +76,7 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
     },
     onSuccess: () => {
       toast({ title: "Cartela deleted successfully!" });
-      queryClient.invalidateQueries({ queryKey: ["/api/cartelas", shopId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/cartelas", shopId] });
     },
     onError: (error: any) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -86,7 +86,7 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
   // Bulk import cartelas
   const bulkImportMutation = useMutation({
     mutationFn: async (bulkData: string) => {
-      const response = await fetch("/api/cartelas/bulk-import", {
+      const response = await fetch("/api/mongodb/cartelas/bulk-import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ shopId, adminId, bulkData }),
@@ -99,7 +99,7 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
         title: "Bulk import completed!", 
         description: `${result.updated} updated, ${result.added} added, ${result.skipped} skipped` 
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/cartelas", shopId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/cartelas", shopId] });
       setBulkInput("");
       setIsBulkOpen(false);
     },
@@ -183,7 +183,7 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
                 .then(data => {
                   if (data.loaded) {
                     toast({ title: "Success", description: "Default cartelas loaded successfully" });
-                    queryClient.invalidateQueries({ queryKey: ["/api/cartelas", shopId] });
+                    queryClient.invalidateQueries({ queryKey: ["/api/mongodb/cartelas", shopId] });
                   } else {
                     toast({ title: "Info", description: "Cartelas already exist for this shop" });
                   }

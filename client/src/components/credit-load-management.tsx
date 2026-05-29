@@ -42,7 +42,7 @@ export function CreditLoadManagement({ userRole }: CreditLoadManagementProps) {
   const [processingNotes, setProcessingNotes] = useState("");
 
   const { data: creditLoads = [], refetch } = useQuery({
-    queryKey: ["/api/admin/credit-loads"],
+    queryKey: ["/api/mongodb/admin/credit-loads"],
     enabled: userRole === 'super_admin',
   });
 
@@ -62,7 +62,7 @@ export function CreditLoadManagement({ userRole }: CreditLoadManagementProps) {
       return response.json();
     },
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/credit-loads"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/admin/credit-loads"] });
       setShowDetailsDialog(false);
       setSelectedLoad(null);
       setProcessingNotes("");

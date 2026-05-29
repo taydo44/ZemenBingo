@@ -20,7 +20,7 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
 
   // Fetch current settings
   const { data: currentSettings } = useQuery({
-    queryKey: ["/api/admin/system-settings"],
+    queryKey: ["/api/mongodb/admin/system-settings"],
     enabled: userRole === 'admin' || userRole === 'super_admin',
   });
 
@@ -33,13 +33,13 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
   }, [currentSettings]);
 
   const { data: gameHistory = [] } = useQuery({
-    queryKey: ["/api/admin/game-history"],
+    queryKey: ["/api/mongodb/admin/game-history"],
     enabled: userRole === 'admin' || userRole === 'super_admin',
   });
 
   const updateSettingsMutation = useMutation({
     mutationFn: async (settings: any) => {
-      const response = await fetch("/api/admin/system-settings", {
+      const response = await fetch("/api/mongodb/admin/system-settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
@@ -54,8 +54,8 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
     },
     onSuccess: () => {
       // Invalidate cache to refresh settings display
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/system-settings"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/shops"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/admin/system-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/shops"] });
       toast({
         title: "Settings Updated",
         description: "System settings have been updated successfully.",

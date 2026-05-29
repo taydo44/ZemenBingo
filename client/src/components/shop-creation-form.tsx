@@ -46,7 +46,7 @@ export function ShopCreationForm({ onSuccess }: ShopCreationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: allAdmins = [] } = useQuery({
-    queryKey: ["/api/admin/all-admins"],
+    queryKey: ["/api/mongodb/super-admin/admins"],
   });
 
   const form = useForm<ShopCreationForm>({
@@ -62,7 +62,7 @@ export function ShopCreationForm({ onSuccess }: ShopCreationFormProps) {
 
   const createShopMutation = useMutation({
     mutationFn: async (data: ShopCreationForm) => {
-      const response = await apiRequest("POST", "/api/shops", {
+      const response = await apiRequest("POST", "/api/mongodb/shops", {
         name: data.name,
         adminId: parseInt(data.adminId),
         profitMargin: data.profitMargin,

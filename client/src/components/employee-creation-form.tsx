@@ -43,7 +43,7 @@ export function EmployeeCreationForm({ onSuccess }: EmployeeCreationFormProps) {
 
   const createEmployeeMutation = useMutation({
     mutationFn: async (data: EmployeeCreationForm) => {
-      const response = await apiRequest("POST", "/api/admin/create-employee", data);
+      const response = await apiRequest("POST", "/api/mongodb/admin/create-employee", data);
       return await response.json();
     },
     onSuccess: (data) => {
@@ -52,8 +52,8 @@ export function EmployeeCreationForm({ onSuccess }: EmployeeCreationFormProps) {
         description: `Employee ${data.employee.name} created successfully`,
       });
       form.reset();
-      queryClient.invalidateQueries({ queryKey: ["/api/users/shop"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/employees"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/users/shop"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mongodb/admin/employees"] });
       onSuccess?.();
     },
     onError: (error: any) => {

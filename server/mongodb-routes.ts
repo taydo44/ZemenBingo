@@ -532,5 +532,554 @@ export function registerMongoDBRoutes(app: Express): void {
       }
     }
   );
+  // ── ADMIN ROUTES ─────────────────────────────────────────────────
+
+  app.get(
+    "/api/mongodb/admin/employees",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const employees = await User.find({
+          shopId: req.session.user.shopId,
+          role: { $in: ["employee", "collector"] },
+        }).select("-password");
+        res.json(employees);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to get employees" });
+      }
+    }
+  );
+
+  app.get("/api/mongodb/users/shop", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.user)
+        return res.status(401).json({ message: "Not authenticated" });
+      const users = await User.find({ shopId: req.session.user.shopId }).select(
+        "-password"
+      );
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get shop users" });
+    }
+  });
+
+  app.get(
+    "/api/mongodb/admin/shop-stats",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const shop = await Shop.findById(req.session.user.shopId);
+        const employeeCount = await User.countDocuments({
+          shopId: req.session.user.shopId,
+          role: "employee",
+        });
+        const gameCount = await Game.countDocuments({
+          shopId: req.session.user.shopId,
+          status: "completed",
+        });
+        const revenue = await Transaction.aggregate([
+          {
+            $match: {
+              shopId: new (require("mongoose").Types.ObjectId)(
+                req.session.user.shopId
+              ),
+              type: "revenue",
+            },
+          },
+          { $group: { _id: null, total: { $sum: "$amount" } } },
+        ]);
+        res.json({
+          shopName: shop?.name,
+          employeeCount,
+          gameCount,
+          totalRevenue: revenue[0]?.total || 0,
+        });
+      } catch (error) {
+        res.status(500).json({ message: "Failed to get shop stats" });
+      }
+    }
+  );
+
+  app.get("/api/mongodb/admin/shops", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.user)
+        return res.status(401).json({ message: "Not authenticated" });
+      const shop = await Shop.findById(req.session.user.shopId);
+      res.json(shop ? [shop] : []);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get shops" });
+    }
+  });
+
+  app.post(
+    "/api/mongodb/admin/create-employee",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const { username, password, name, email, role } = req.body;
+        const existingUser = await User.findOne({ username });
+        if (existingUser)
+          return res.status(400).json({ message: "Username already exists" });
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const accountNumber = `BGO${Math.floor(Math.random() * 1000000000)}`;
+        const employee = new User({
+          username,
+          name,
+          email,
+          password: hashedPassword,
+          role: role || "employee",
+          shopId: req.session.user.shopId,
+          supervisorId: req.session.user.id,
+          accountNumber,
+          commissionRate: 15,
+        });
+        await employee.save();
+        const { password: _, ...employeeResponse } = employee.toObject();
+        res.json(employeeResponse);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to create employee" });
+      }
+    }
+  );
+
+  app.post(
+    "/api/mongodb/employees/create-collector",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const { username, password, name } = req.body;
+        const existingUser = await User.findOne({ username });
+        if (existingUser)
+          return res.status(400).json({ message: "Username already exists" });
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const accountNumber = `BGO${Math.floor(Math.random() * 1000000000)}`;
+        const collector = new User({
+          username,
+          name,
+          password: hashedPassword,
+          role: "collector",
+          shopId: req.session.user.shopId,
+          supervisorId: req.session.user.id,
+          accountNumber,
+          commissionRate: 5,
+        });
+        await collector.save();
+        const { password: _, ...collectorResponse } = collector.toObject();
+        res.json(collectorResponse);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to create collector" });
+      }
+    }
+  );
+
+  app.get(
+    "/api/mongodb/admin/employee-profit-margins",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const employees = await User.find({
+          shopId: req.session.user.shopId,
+          role: "employee",
+        }).select("-password");
+        res.json(
+          employees.map((e) => ({
+            employeeId: e._id,
+            name: e.name,
+            commissionRate: e.commissionRate,
+          }))
+        );
+      } catch (error) {
+        res.status(500).json({ message: "Failed to get profit margins" });
+      }
+    }
+  );
+
+  app.post(
+    "/api/mongodb/admin/employee-profit-margins",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const { employeeId, commissionRate } = req.body;
+        await User.findByIdAndUpdate(employeeId, { commissionRate });
+        res.json({ message: "Profit margin updated" });
+      } catch (error) {
+        res.status(500).json({ message: "Failed to update profit margin" });
+      }
+    }
+  );
+
+  app.get(
+    "/api/mongodb/admin/game-history",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const games = await Game.find({ shopId: req.session.user.shopId })
+          .populate("employeeId", "name username")
+          .sort({ createdAt: -1 })
+          .limit(50);
+        res.json(games);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to get game history" });
+      }
+    }
+  );
+
+  app.get(
+    "/api/mongodb/admin/system-settings",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const shop = await Shop.findById(req.session.user.shopId);
+        res.json({
+          profitMargin: shop?.profitMargin || 20,
+          superAdminCommission: shop?.superAdminCommission || 25,
+        });
+      } catch (error) {
+        res.status(500).json({ message: "Failed to get system settings" });
+      }
+    }
+  );
+
+  app.post(
+    "/api/mongodb/admin/system-settings",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const { profitMargin, superAdminCommission } = req.body;
+        await Shop.findByIdAndUpdate(req.session.user.shopId, {
+          profitMargin,
+          superAdminCommission,
+        });
+        res.json({ message: "Settings updated" });
+      } catch (error) {
+        res.status(500).json({ message: "Failed to update settings" });
+      }
+    }
+  );
+
+  // ── CREDIT ROUTES ─────────────────────────────────────────────────
+
+  app.get(
+    "/api/mongodb/credit/balance",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const user = await User.findById(req.session.user.id).select(
+          "creditBalance"
+        );
+        res.json({ balance: user?.creditBalance || 0 });
+      } catch (error) {
+        res.status(500).json({ message: "Failed to get credit balance" });
+      }
+    }
+  );
+
+  app.post("/api/mongodb/credit/load", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.user)
+        return res.status(401).json({ message: "Not authenticated" });
+      const { amount, paymentMethod, referenceNumber } = req.body;
+      const creditLoad = new CreditLoad({
+        adminId: req.session.user.id,
+        amount,
+        paymentMethod,
+        referenceNumber,
+        status: "pending",
+      });
+      await creditLoad.save();
+      res.json({ message: "Credit load request submitted", creditLoad });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to submit credit load" });
+    }
+  });
+
+  app.post(
+    "/api/mongodb/credit/transfer",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const { toUserId, amount } = req.body;
+        const fromUser = await User.findById(req.session.user.id);
+        if (!fromUser || fromUser.creditBalance < amount) {
+          return res
+            .status(400)
+            .json({ message: "Insufficient credit balance" });
+        }
+        await User.findByIdAndUpdate(req.session.user.id, {
+          $inc: { creditBalance: -amount },
+        });
+        await User.findByIdAndUpdate(toUserId, {
+          $inc: { creditBalance: amount },
+        });
+        const transaction = new Transaction({
+          fromUserId: req.session.user.id,
+          toUserId,
+          amount,
+          type: "transfer",
+          shopId: req.session.user.shopId,
+        });
+        await transaction.save();
+        res.json({ message: "Transfer successful" });
+      } catch (error) {
+        res.status(500).json({ message: "Failed to transfer credits" });
+      }
+    }
+  );
+
+  // ── CARTELA ROUTES ────────────────────────────────────────────────
+
+  app.get("/api/mongodb/cartelas", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.user)
+        return res.status(401).json({ message: "Not authenticated" });
+      const { shopId } = req.query;
+      const cartelas = await Cartela.find({
+        shopId: shopId || req.session.user.shopId,
+      });
+      res.json(cartelas);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get cartelas" });
+    }
+  });
+
+  app.post("/api/mongodb/cartelas", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.user)
+        return res.status(401).json({ message: "Not authenticated" });
+      const cartela = new Cartela({
+        ...req.body,
+        shopId: req.session.user.shopId,
+        adminId: req.session.user.id,
+      });
+      await cartela.save();
+      res.json(cartela);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create cartela" });
+    }
+  });
+
+  app.patch(
+    "/api/mongodb/cartelas/:id",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const cartela = await Cartela.findByIdAndUpdate(
+          req.params.id,
+          { ...req.body, updatedAt: new Date() },
+          { new: true }
+        );
+        res.json(cartela);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to update cartela" });
+      }
+    }
+  );
+
+  app.delete(
+    "/api/mongodb/cartelas/:id",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        await Cartela.findByIdAndDelete(req.params.id);
+        res.json({ message: "Cartela deleted" });
+      } catch (error) {
+        res.status(500).json({ message: "Failed to delete cartela" });
+      }
+    }
+  );
+
+  app.post(
+    "/api/mongodb/cartelas/bulk-import",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const { cartelas } = req.body;
+        const created = await Cartela.insertMany(
+          cartelas.map((c: any) => ({
+            ...c,
+            shopId: req.session.user.shopId,
+            adminId: req.session.user.id,
+          }))
+        );
+        res.json({
+          message: `${created.length} cartelas imported`,
+          cartelas: created,
+        });
+      } catch (error) {
+        res.status(500).json({ message: "Failed to bulk import cartelas" });
+      }
+    }
+  );
+
+  app.post(
+    "/api/mongodb/cartelas/reset",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        await Cartela.updateMany(
+          { shopId: req.session.user.shopId },
+          {
+            isBooked: false,
+            bookedBy: null,
+            collectorId: null,
+            markedAt: null,
+            gameId: null,
+          }
+        );
+        res.json({ message: "Cartelas reset successfully" });
+      } catch (error) {
+        res.status(500).json({ message: "Failed to reset cartelas" });
+      }
+    }
+  );
+
+  app.get(
+    "/api/mongodb/custom-cartelas",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const { shopId } = req.query;
+        const cartelas = await Cartela.find({
+          shopId: shopId || req.session.user.shopId,
+          isHardcoded: false,
+        });
+        res.json(cartelas);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to get custom cartelas" });
+      }
+    }
+  );
+
+  app.post(
+    "/api/mongodb/custom-cartelas",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const cartela = new Cartela({
+          ...req.body,
+          shopId: req.session.user.shopId,
+          adminId: req.session.user.id,
+          isHardcoded: false,
+        });
+        await cartela.save();
+        res.json(cartela);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to create custom cartela" });
+      }
+    }
+  );
+
+  // ── GAME ROUTES ───────────────────────────────────────────────────
+
+  app.post("/api/mongodb/games", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.user)
+        return res.status(401).json({ message: "Not authenticated" });
+      const game = new Game({
+        ...req.body,
+        shopId: req.session.user.shopId,
+        employeeId: req.session.user.id,
+        status: "waiting",
+      });
+      await game.save();
+      res.json(game);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create game" });
+    }
+  });
+
+  // ── REPORT ROUTES ─────────────────────────────────────────────────
+
+  app.get(
+    "/api/mongodb/reports/retail",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const { shopId, from, to } = req.query;
+        const filter: any = { shopId: shopId || req.session.user.shopId };
+        if (from || to) {
+          filter.createdAt = {};
+          if (from) filter.createdAt.$gte = new Date(from as string);
+          if (to) filter.createdAt.$lte = new Date(to as string);
+        }
+        const games = await Game.find(filter)
+          .populate("employeeId", "name")
+          .sort({ createdAt: -1 });
+        res.json(games);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to get retail report" });
+      }
+    }
+  );
+
+  app.get(
+    "/api/mongodb/reports/summary",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const { shopId, from, to } = req.query;
+        const filter: any = { shopId: shopId || req.session.user.shopId };
+        if (from || to) {
+          filter.createdAt = {};
+          if (from) filter.createdAt.$gte = new Date(from as string);
+          if (to) filter.createdAt.$lte = new Date(to as string);
+        }
+        const result = await Game.aggregate([
+          { $match: filter },
+          {
+            $group: {
+              _id: null,
+              totalGames: { $sum: 1 },
+              totalRevenue: { $sum: "$prizePool" },
+              avgPlayers: { $avg: { $size: "$players" } },
+            },
+          },
+        ]);
+        res.json(
+          result[0] || { totalGames: 0, totalRevenue: 0, avgPlayers: 0 }
+        );
+      } catch (error) {
+        res.status(500).json({ message: "Failed to get summary report" });
+      }
+    }
+  );
+
+  app.get(
+    "/api/mongodb/employee/game-history",
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.session.user)
+          return res.status(401).json({ message: "Not authenticated" });
+        const { employeeId } = req.query;
+        const games = await Game.find({
+          employeeId: employeeId || req.session.user.id,
+        })
+          .sort({ createdAt: -1 })
+          .limit(50);
+        res.json(games);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to get game history" });
+      }
+    }
+  );
   console.log("🍃 MongoDB routes registered successfully");
 }

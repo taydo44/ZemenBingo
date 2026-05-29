@@ -44,14 +44,14 @@ export default function BingoGameFixed({ employeeName, employeeId, shopId, onLog
   
   // Fetch shop data for profit margin calculation
   const { data: shopData } = useQuery({
-    queryKey: ["/api/shops", shopId],
+    queryKey: ["/api/mongodb/shops", shopId],
     enabled: !!shopId,
   });
 
   // Create game mutation
   const createGameMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/games", {
+      const response = await apiRequest("POST", "/api/mongodb/games", {
         shopId,
         employeeId,
         status: 'waiting',

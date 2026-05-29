@@ -20,15 +20,15 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState("overview");
 
   const { data: employees = [], refetch: refetchEmployees } = useQuery({
-    queryKey: ["/api/admin/employees"],
+    queryKey: ["/api/mongodb/admin/employees"],
   });
 
   const { data: shopStats } = useQuery({
-    queryKey: ["/api/admin/shop-stats"],
+    queryKey: ["/api/mongodb/admin/shop-stats"],
   });
 
   const { data: creditBalance } = useQuery({
-    queryKey: ["/api/credit/balance"],
+    queryKey: ["/api/mongodb/credit/balance"],
   });
 
   const handleEmployeeCreated = () => {
