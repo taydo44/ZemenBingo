@@ -1,23 +1,37 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { username: string; password: string }) => {
-      console.log("Attempting login with:", { username: credentials.username, password: "***" });
-      const response = await apiRequest("POST", "/api/mongodb/auth/login", credentials);
+      console.log("Attempting login with:", {
+        username: credentials.username,
+        password: "***",
+      });
+      const response = await apiRequest(
+        "POST",
+        "/api/mongodb/auth/login",
+        credentials
+      );
       const data = await response.json();
       console.log("Login response:", data);
       return data;
@@ -28,17 +42,22 @@ export default function LoginPage() {
         title: "Login successful",
         description: `Welcome back, ${user.name}!`,
       });
-      
-      // Redirect based on user role
-      if (user.role === "super_admin") {
-        setLocation("/dashboard/super-admin");
-      } else if (user.role === "admin") {
-        setLocation("/dashboard/admin");
-      } else if (user.role === "employee") {
-        setLocation("/dashboard/employee");
-      } else if (user.role === "collector") {
-        setLocation("/dashboard/collector");
-      }
+
+      // Update query cache with user data
+      queryClient.setQueryData(["/api/mongodb/auth/me"], { user });
+
+      // Small delay to allow session to be established before redirect
+      setTimeout(() => {
+        if (user.role === "super_admin") {
+          setLocation("/dashboard/super-admin");
+        } else if (user.role === "admin") {
+          setLocation("/dashboard/admin");
+        } else if (user.role === "employee") {
+          setLocation("/dashboard/employee");
+        } else if (user.role === "collector") {
+          setLocation("/dashboard/collector");
+        }
+      }, 800);
     },
     onError: (error: any) => {
       console.error("Login error details:", error);
@@ -68,7 +87,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-96">
         <CardHeader>
-          <CardTitle>Bingo System Login</CardTitle>
+          <CardTitle>ZemenBingo Login</CardTitle>
           <CardDescription>
             Enter your username and password to access the system
             <br />
@@ -103,16 +122,14 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full"
               disabled={loginMutation.isPending}
             >
               {loginMutation.isPending ? "Logging in..." : "Login"}
             </Button>
           </form>
-          
-
         </CardContent>
       </Card>
     </div>
